@@ -2,6 +2,18 @@ import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { Request } from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+// Get current directory in ES module context
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Configure Cloudinary
 cloudinary.config({
@@ -13,7 +25,7 @@ cloudinary.config({
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
