@@ -152,9 +152,7 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      createdAt: now,
-      avatar: insertUser.avatar || null,
-      bio: insertUser.bio || null
+      createdAt: now
     };
     this.users.set(id, user);
     return user;
@@ -204,8 +202,7 @@ export class MemStorage implements IStorage {
     const post: Post = {
       ...insertPost,
       id,
-      createdAt: now,
-      mediaUrl: insertPost.mediaUrl || null
+      createdAt: now
     };
     this.posts.set(id, post);
     return post;
@@ -222,8 +219,7 @@ export class MemStorage implements IStorage {
     const poll: Poll = {
       ...insertPoll,
       id,
-      createdAt: now,
-      isAnonymous: insertPoll.isAnonymous || null
+      createdAt: now
     };
     this.polls.set(id, poll);
     return poll;
@@ -394,9 +390,7 @@ export class MemStorage implements IStorage {
     const conversation: Conversation = {
       ...insertConversation,
       id,
-      createdAt: now,
-      name: insertConversation.name || null,
-      isGroup: insertConversation.isGroup || null
+      createdAt: now
     };
     this.conversations.set(id, conversation);
     return conversation;
@@ -459,9 +453,7 @@ export class MemStorage implements IStorage {
     const echoLink: EchoLink = {
       ...insertEchoLink,
       id,
-      createdAt: now,
-      welcomeMessage: insertEchoLink.welcomeMessage || null,
-      active: insertEchoLink.active || null
+      createdAt: now
     };
     this.echoLinks.set(id, echoLink);
     return echoLink;
@@ -493,8 +485,7 @@ export class MemStorage implements IStorage {
     const message: AnonymousMessage = {
       ...insertMessage,
       id,
-      createdAt: now,
-      answered: insertMessage.answered || null
+      createdAt: now
     };
     this.anonymousMessages.set(id, message);
     return message;
@@ -526,9 +517,7 @@ export class MemStorage implements IStorage {
     const notification: Notification = {
       ...insertNotification,
       id,
-      createdAt: now,
-      referenceId: insertNotification.referenceId || null,
-      read: insertNotification.read || null
+      createdAt: now
     };
     this.notifications.set(id, notification);
     return notification;

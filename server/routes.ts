@@ -1,9 +1,8 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { WebSocket } from "ws";
-import uploadRouter from "./upload";
 import { 
   insertUserSchema, 
   insertPostSchema, 
@@ -28,9 +27,6 @@ const clients = new Map<number, WebSocket>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
-  
-  // Register the upload router
-  app.use('/api', uploadRouter);
   
   // Setup WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
