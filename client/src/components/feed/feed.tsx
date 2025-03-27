@@ -8,7 +8,7 @@ export function Feed() {
   const { user } = useAuth();
 
   const { data: posts, isLoading } = useQuery({
-    queryKey: user ? ['/api/posts/feed', user.id] : ['/api/posts'],
+    queryKey: user ? [`/api/posts/feed/${user.id}`] : ['/api/posts'],
     enabled: true,
   });
 

@@ -135,7 +135,7 @@ export function CreatePost() {
       });
 
       // Refresh the feed
-      queryClient.invalidateQueries({ queryKey: ['/api/posts/feed', user.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/posts/feed/${user.id}`] });
     } catch (error) {
       toast({
         title: "Error",
