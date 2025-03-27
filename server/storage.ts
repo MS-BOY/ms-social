@@ -205,7 +205,8 @@ export class MemStorage implements IStorage {
       ...insertPost,
       id,
       createdAt: now,
-      mediaUrl: insertPost.mediaUrl || null
+      mediaUrl: insertPost.mediaUrl || null,
+      mediaType: insertPost.mediaType || null
     };
     this.posts.set(id, post);
     return post;

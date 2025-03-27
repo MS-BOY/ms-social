@@ -15,6 +15,7 @@ interface PostCardProps {
     userId: number;
     content: string;
     mediaUrl?: string;
+    mediaType?: string;
     createdAt: string;
   };
 }
@@ -172,7 +173,20 @@ export function PostCard({ post }: PostCardProps) {
           {/* Post Media */}
           {post.mediaUrl && (
             <div className="mt-3 rounded-lg overflow-hidden">
-              <img src={post.mediaUrl} alt="Post media" className="w-full h-auto object-cover" />
+              {post.mediaType === 'video' ? (
+                <video 
+                  src={post.mediaUrl} 
+                  controls 
+                  className="w-full h-auto" 
+                  preload="metadata"
+                />
+              ) : (
+                <img 
+                  src={post.mediaUrl} 
+                  alt="Post media" 
+                  className="w-full h-auto object-cover" 
+                />
+              )}
             </div>
           )}
 

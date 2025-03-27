@@ -1,8 +1,11 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { WebSocket } from "ws";
+import { upload, uploadToCloudinary } from './cloudinary';
+import fs from 'fs';
+import path from 'path';
 import { 
   insertUserSchema, 
   insertPostSchema, 
@@ -234,6 +237,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Media upload route
+  app.post('/api/media/upload', upload.single('media'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const file = req.file;
+      const resourceType = file.mimetype.startsWith('image/') ? 'image' : 'video';
+      
+      // Upload to Cloudinary
+      const result = await uploadToCloudinary(file.path, resourceType);
+      
+      // Delete the file from local storage after upload
+      fs.unlinkSync(file.path);
+      
+      return res.status(200).json({
+        url: result.secure_url,
+        mediaType: resourceType
+      });
+    } catch (error) {
+      console.error('Media upload error:', error);
+      return res.status(500).json({ message: 'Failed to upload media' });
+    }
+  });
+
   app.post('/api/posts', async (req: Request, res: Response) => {
     try {
       const postData = insertPostSchema.parse(req.body);
