@@ -175,28 +175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get user by username
-  app.get('/api/users/username/:username', async (req: Request, res: Response) => {
-    try {
-      const username = req.params.username;
-      if (!username) {
-        return res.status(400).json({ message: 'Username is required' });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      return res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  });
-  
   app.get('/api/users/:id', async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
