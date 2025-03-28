@@ -112,7 +112,7 @@ export class MemStorage implements IStorage {
   private anonymousMessages: Map<number, AnonymousMessage>;
   private notifications: Map<number, Notification>;
   
-  private userIdCounter = 1;
+  private userIdCounter = 2; // Start from 2 since we've added a demo user with ID 1
   private postIdCounter = 1;
   private pollIdCounter = 1;
   private pollOptionIdCounter = 1;
@@ -142,6 +142,19 @@ export class MemStorage implements IStorage {
     this.echoLinks = new Map();
     this.anonymousMessages = new Map();
     this.notifications = new Map();
+    
+    // Add a demo user
+    const demoUser: User = {
+      id: 1,
+      username: 'demo',
+      email: 'demo@example.com',
+      password: 'password',
+      displayName: 'Demo User',
+      createdAt: new Date(),
+      avatar: 'https://ui-avatars.com/api/?name=Demo+User&background=random',
+      bio: 'This is a demo user account for testing purposes.'
+    };
+    this.users.set(demoUser.id, demoUser);
   }
 
   // Users
