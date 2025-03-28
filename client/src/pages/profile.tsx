@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { RightSidebar } from "@/components/layout/right-sidebar";
@@ -12,12 +12,19 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from "@/components/feed/post-card";
 import { EchoLinkModal } from "@/components/modals/echo-link-modal";
-import { LinkIcon, UserIcon, CalendarIcon, AtSignIcon, UsersIcon, UserPlusIcon } from "lucide-react";
+import { LinkIcon, UserIcon, CalendarIcon, UsersIcon, UserPlusIcon, UserMinusIcon, Check } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [isEchoLinkModalOpen, setIsEchoLinkModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Store follows/unfollows loading states
+  const [followLoading, setFollowLoading] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -28,27 +35,103 @@ export default function Profile() {
 
   // Get user's posts
   const { data: userPosts } = useQuery({
-    queryKey: user ? [`/api/users/${user.id}/posts`] : null,
+    queryKey: user ? [`/api/users/${user.id}/posts`] : ["posts-none"],
     enabled: !!user,
   });
 
   // Get user's followers
   const { data: followers } = useQuery({
-    queryKey: user ? [`/api/users/${user.id}/followers`] : null,
+    queryKey: user ? [`/api/users/${user.id}/followers`] : ["followers-none"],
     enabled: !!user,
-  });
+  }) as { data: any[] };
 
   // Get user's following
   const { data: following } = useQuery({
-    queryKey: user ? [`/api/users/${user.id}/following`] : null,
+    queryKey: user ? [`/api/users/${user.id}/following`] : ["following-none"],
     enabled: !!user,
-  });
+  }) as { data: any[] };
 
   // Get user's Echo Link
   const { data: echoLink } = useQuery({
-    queryKey: user ? [`/api/users/${user.id}/echo-link`] : null,
+    queryKey: user ? [`/api/users/${user.id}/echo-link`] : ["echolink-none"],
     enabled: !!user,
-  });
+  }) as { data: any };
+
+  // Check if current user follows a given user
+  const isFollowing = (userId: number) => {
+    if (!following) return false;
+    return following.some((followedUser: any) => followedUser.id === userId);
+  };
+
+  // Follow a user
+  const handleFollow = async (targetUserId: number) => {
+    if (!user) return;
+    
+    try {
+      setFollowLoading(prev => ({ ...prev, [targetUserId]: true }));
+      
+      await apiRequest('/api/follows', 'POST', {
+        followerId: user.id,
+        followingId: targetUserId
+      });
+      
+      // Invalidate queries to refresh follower/following lists
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/following`] });
+      
+      toast({
+        title: "Success",
+        description: "User followed successfully",
+      });
+    } catch (error) {
+      console.error('Error following user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to follow user. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setFollowLoading(prev => ({ ...prev, [targetUserId]: false }));
+    }
+  };
+
+  // Unfollow a user
+  const handleUnfollow = async (targetUserId: number) => {
+    if (!user || !following) return;
+    
+    try {
+      // Find the follow relationship
+      const followRelationship = following.find((f: any) => f.id === targetUserId);
+      if (!followRelationship || !followRelationship.followId) {
+        toast({
+          title: "Error",
+          description: "Follow relationship not found",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setFollowLoading(prev => ({ ...prev, [targetUserId]: true }));
+      
+      await apiRequest(`/api/follows/${followRelationship.followId}`, 'DELETE');
+      
+      // Invalidate queries to refresh the followers/following lists
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/following`] });
+      
+      toast({
+        title: "Success",
+        description: "User unfollowed successfully",
+      });
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unfollow user. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setFollowLoading(prev => ({ ...prev, [targetUserId]: false }));
+    }
+  };
 
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
@@ -201,10 +284,41 @@ export default function Profile() {
                               <p className="text-sm text-gray-400">@{follower.username}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" className="bg-zinc-800 hover:bg-zinc-700 border-zinc-700">
-                            <UserPlusIcon size={14} className="mr-1" />
-                            Follow
-                          </Button>
+                          {isFollowing(follower.id) ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-primary-600 hover:bg-primary-700 border-primary-600"
+                              onClick={() => handleUnfollow(follower.id)}
+                              disabled={followLoading[follower.id]}
+                            >
+                              {followLoading[follower.id] ? (
+                                <span className="animate-pulse">Loading...</span>
+                              ) : (
+                                <>
+                                  <Check size={14} className="mr-1" />
+                                  Following
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
+                              onClick={() => handleFollow(follower.id)}
+                              disabled={followLoading[follower.id]}
+                            >
+                              {followLoading[follower.id] ? (
+                                <span className="animate-pulse">Loading...</span>
+                              ) : (
+                                <>
+                                  <UserPlusIcon size={14} className="mr-1" />
+                                  Follow
+                                </>
+                              )}
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -234,8 +348,21 @@ export default function Profile() {
                               <p className="text-sm text-gray-400">@{followedUser.username}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" className="bg-primary-600 hover:bg-primary-700 border-primary-600">
-                            Following
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-primary-600 hover:bg-primary-700 border-primary-600"
+                            onClick={() => handleUnfollow(followedUser.id)}
+                            disabled={followLoading[followedUser.id]}
+                          >
+                            {followLoading[followedUser.id] ? (
+                              <span className="animate-pulse">Loading...</span>
+                            ) : (
+                              <>
+                                <UserMinusIcon size={14} className="mr-1" />
+                                Unfollow
+                              </>
+                            )}
                           </Button>
                         </div>
                       ))}

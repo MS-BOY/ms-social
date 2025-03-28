@@ -26,24 +26,27 @@ export function Chat({ conversationId, onBack }: ChatProps) {
   const { data: conversation } = useQuery({
     queryKey: [`/api/conversations/${conversationId}`],
     enabled: !!conversationId,
-  });
+  }) as { data: any };
 
   // Get conversation participants
   const { data: participants } = useQuery({
     queryKey: [`/api/conversations/${conversationId}/participants`],
     enabled: !!conversationId,
-  });
+  }) as { data: any[] };
 
   // Get conversation messages
   const { data: conversationMessages } = useQuery({
     queryKey: [`/api/conversations/${conversationId}/messages`],
     enabled: !!conversationId,
-  });
+  }) as { data: any[] };
 
   // Update messages when data changes
   useEffect(() => {
-    if (conversationMessages) {
+    if (conversationMessages && Array.isArray(conversationMessages)) {
       setMessages(conversationMessages);
+    } else if (conversationMessages) {
+      // Handle edge case where it's not an array
+      setMessages([]);
     }
   }, [conversationMessages]);
 
@@ -78,10 +81,20 @@ export function Chat({ conversationId, onBack }: ChatProps) {
     return participants.find((p: any) => p.userId === userId);
   };
 
-  // Get user data for a participant
-  const { data: participantsData } = useQuery({
-    queryKey: [`/api/users/${conversationId}/participants`],
-    enabled: !!participants,
+  // Get user data for each participant
+  const { data: participantsData, isLoading: participantsLoading } = useQuery({
+    queryKey: [`/api/users/participants`],
+    queryFn: async () => {
+      if (!participants || participants.length === 0) return [];
+      
+      // Fetch user data for each participant
+      const userPromises = participants.map((p: any) => 
+        fetch(`/api/users/${p.userId}`).then(r => r.json())
+      );
+      
+      return Promise.all(userPromises);
+    },
+    enabled: !!participants && participants.length > 0,
   });
 
   // Get conversation name
@@ -219,8 +232,10 @@ export function Chat({ conversationId, onBack }: ChatProps) {
                   <div className={`max-w-[75%] ${isMine ? 'order-2' : 'order-1'}`}>
                     {!isMine && (
                       <Avatar className="h-6 w-6 mb-1 inline-block mr-1">
-                        <AvatarImage src={getParticipant(msg.senderId)?.avatar} />
-                        <AvatarFallback>{getInitials(getParticipant(msg.senderId)?.displayName || "")}</AvatarFallback>
+                        <AvatarImage src={participantsData?.find((p: any) => p.id === msg.senderId)?.avatar} />
+                        <AvatarFallback>
+                          {getInitials(participantsData?.find((p: any) => p.id === msg.senderId)?.displayName || "")}
+                        </AvatarFallback>
                       </Avatar>
                     )}
                     

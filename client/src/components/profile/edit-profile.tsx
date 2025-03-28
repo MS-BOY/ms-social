@@ -139,9 +139,9 @@ export function EditProfile() {
         />
       </div>
       
-      <Card className="bg-white/95 dark:bg-black/90 backdrop-blur-sm shadow-xl">
+      <Card className="bg-zinc-900 border-zinc-800 text-white shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-transparent bg-clip-text">
             Edit Profile
           </CardTitle>
         </CardHeader>
@@ -200,7 +200,11 @@ export function EditProfile() {
                   <FormItem>
                     <FormLabel>Display Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your display name" {...field} />
+                      <Input 
+                        placeholder="Your display name" 
+                        className="bg-zinc-950 border-zinc-800 text-white"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -216,7 +220,7 @@ export function EditProfile() {
                     <FormControl>
                       <Textarea 
                         placeholder="Tell us a little about yourself"
-                        className="resize-none"
+                        className="resize-none bg-zinc-950 border-zinc-800 text-white"
                         {...field}
                         value={field.value || ""}
                       />

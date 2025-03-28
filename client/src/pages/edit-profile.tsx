@@ -29,18 +29,20 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={handleBack}
-          className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="sr-only">Back</span>
-        </Button>
-        <EditProfile />
+    <div className="min-h-screen bg-zinc-950 p-4">
+      <div className="container mx-auto py-10 px-4">
+        <div className="max-w-3xl mx-auto">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleBack}
+            className="mb-4 text-white hover:bg-zinc-800"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Back</span>
+          </Button>
+          <EditProfile />
+        </div>
       </div>
     </div>
   );
