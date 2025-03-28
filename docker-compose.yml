@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    env_file:
+      - .env
+    restart: unless-stopped
+    
+  # Uncomment this section if you want to use PostgreSQL
+  # db:
+  #   image: postgres:15-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=socialmedia
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# Uncomment this section if you want to use PostgreSQL
+# volumes:
+#   postgres_data:
