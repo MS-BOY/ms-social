@@ -1,4 +1,4 @@
-# Social Media Platform
+# ms-social
 
 A sophisticated social media platform designed for seamless user interaction, featuring advanced communication and engagement tools.
 
@@ -44,8 +44,8 @@ A sophisticated social media platform designed for seamless user interaction, fe
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/social-media-platform.git
-   cd social-media-platform
+   git clone https://github.com/MS-BOY/ms-social.git
+   cd ms-social
    ```
 
 2. Install dependencies
