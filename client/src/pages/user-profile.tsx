@@ -48,19 +48,26 @@ export default function UserProfile() {
 
   // Get the profile of the user being viewed
   const { data: profileUser, isLoading: profileLoading } = useQuery({
-    queryKey: [`/api/users/search`, username || ""],
+    queryKey: [`/api/users/username`, username || ""],
     queryFn: async () => {
       if (!username) return null;
-      const response = await fetch(`/api/users/search?query=${encodeURIComponent(username)}`);
-      const data = await response.json();
-      // Find the exact username match
-      const exactMatch = data.find((u: any) => u.username === username);
-      if (!exactMatch) {
-        throw new Error("User not found");
+      try {
+        // Use our direct username lookup endpoint
+        const response = await fetch(`/api/users/username/${encodeURIComponent(username)}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error("User not found");
+          }
+          throw new Error("Error fetching user profile");
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        throw error;
       }
-      return exactMatch;
     },
-    enabled: !!username
+    enabled: !!username,
+    retry: false
   });
 
   // Get user's posts
