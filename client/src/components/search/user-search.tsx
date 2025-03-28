@@ -228,7 +228,10 @@ export function UserSearch() {
             <div className="divide-y divide-zinc-700">
               {searchResults.map((searchUser: any) => (
                 <div key={searchUser.id} className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
+                  <div 
+                    className="flex items-center cursor-pointer" 
+                    onClick={() => setLocation(`/user/${searchUser.username}`)}
+                  >
                     <Avatar className="h-10 w-10 mr-3">
                       <AvatarImage src={searchUser.avatar} alt={searchUser.displayName} />
                       <AvatarFallback>{getInitials(searchUser.displayName)}</AvatarFallback>

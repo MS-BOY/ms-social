@@ -11,6 +11,7 @@ import Explore from "@/pages/explore";
 import Notifications from "@/pages/notifications";
 import Messages from "@/pages/messages";
 import Profile from "@/pages/profile";
+import UserProfile from "@/pages/user-profile";
 import EchoLink from "@/pages/echo-link";
 import EditProfile from "@/pages/edit-profile";
 import Search from "@/pages/search";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/messages" component={Messages} />
       <Route path="/profile" component={Profile} />
       <Route path="/profile/edit" component={EditProfile} />
+      <Route path="/user/:username" component={UserProfile} />
       <Route path="/echo-link" component={EchoLink} />
       <Route path="/search" component={Search} />
       <Route path="/login" component={Login} />
