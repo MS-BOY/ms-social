@@ -15,8 +15,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string, displayName: string) => Promise<void>;
+  login: (loginIdentifier: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string, displayName: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -52,10 +52,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (loginIdentifier: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/auth/login", { username, password });
+      const response = await apiRequest("POST", "/api/auth/login", { loginIdentifier, password });
       const userData = await response.json();
       setUser(userData);
       
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid username or password",
+        description: error instanceof Error ? error.message : "Invalid email/username or password",
         variant: "destructive",
       });
       throw error;
@@ -81,11 +81,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const register = async (username: string, password: string, displayName: string) => {
+  const register = async (username: string, email: string, password: string, displayName: string) => {
     setIsLoading(true);
     try {
       const response = await apiRequest("POST", "/api/auth/register", { 
-        username, 
+        username,
+        email,
         password, 
         displayName,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random` 

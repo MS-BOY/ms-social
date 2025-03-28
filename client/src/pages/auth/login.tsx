@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 
 export default function Login() {
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [loginIdentifier, setLoginIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,14 +18,14 @@ export default function Login() {
     e.preventDefault();
     setError("");
     
-    if (!username || !password) {
-      setError("Username and password are required");
+    if (!loginIdentifier || !password) {
+      setError("Email/username and password are required");
       return;
     }
     
     setIsLoading(true);
     try {
-      await login(username, password);
+      await login(loginIdentifier, password);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Login failed");
     } finally {
@@ -64,14 +64,14 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="login">Email or Username</Label>
               <Input
-                id="username"
+                id="login"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Enter your email or username"
                 className="bg-zinc-950 border-zinc-800 text-white"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={loginIdentifier}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
               />
             </div>
             <div className="space-y-2">

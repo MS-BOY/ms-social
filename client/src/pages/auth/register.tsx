@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 export default function Register() {
   const { register } = useAuth();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -21,7 +22,7 @@ export default function Register() {
     setError("");
     
     // Basic validation
-    if (!username || !password || !confirmPassword || !displayName) {
+    if (!username || !email || !password || !confirmPassword || !displayName) {
       setError("All fields are required");
       return;
     }
@@ -41,9 +42,16 @@ export default function Register() {
       return;
     }
     
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      await register(username, password, displayName);
+      await register(username, email, password, displayName);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Registration failed");
     } finally {
@@ -101,6 +109,17 @@ export default function Register() {
                 className="bg-zinc-950 border-zinc-800 text-white"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email address"
+                className="bg-zinc-950 border-zinc-800 text-white"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">

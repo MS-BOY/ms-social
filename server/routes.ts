@@ -102,9 +102,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = insertUserSchema.parse(req.body);
       
       // Check if username already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
+      const existingUserByUsername = await storage.getUserByUsername(userData.username);
+      if (existingUserByUsername) {
         return res.status(400).json({ message: 'Username already exists' });
+      }
+      
+      // Check if email already exists
+      const existingUserByEmail = await storage.getUserByEmail(userData.email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: 'Email already in use' });
       }
       
       const user = await storage.createUser(userData);
@@ -124,16 +130,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post('/api/auth/login', async (req: Request, res: Response) => {
     try {
-      const { username, password } = req.body;
+      const { loginIdentifier, password } = req.body;
       
-      if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
+      if (!loginIdentifier || !password) {
+        return res.status(400).json({ message: 'Email/username and password are required' });
       }
       
-      const user = await storage.getUserByUsername(username);
+      // Check if loginIdentifier is email or username
+      const isEmail = loginIdentifier.includes('@');
+      
+      // Get user by email or username
+      let user;
+      if (isEmail) {
+        user = await storage.getUserByEmail(loginIdentifier);
+      } else {
+        user = await storage.getUserByUsername(loginIdentifier);
+      }
       
       if (!user || user.password !== password) {
-        return res.status(401).json({ message: 'Invalid username or password' });
+        return res.status(401).json({ message: 'Invalid credentials' });
       }
       
       // Remove password from response
