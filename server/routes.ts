@@ -196,6 +196,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.patch('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+      
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Extract updatable fields
+      const { displayName, bio, avatar } = req.body;
+      
+      // Update user
+      const updatedUser = await storage.updateUser(id, {
+        displayName: displayName !== undefined ? displayName : user.displayName,
+        bio: bio !== undefined ? bio : user.bio,
+        avatar: avatar !== undefined ? avatar : user.avatar,
+      });
+      
+      // Remove password from response
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      return res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  
   // Post routes
   app.get('/api/posts', async (req: Request, res: Response) => {
     try {

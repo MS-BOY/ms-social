@@ -15,12 +15,20 @@ import {
   notifications, Notification, InsertNotification
 } from "@shared/schema";
 
+// Interface for updating user profile
+interface UpdateUserData {
+  displayName?: string;
+  bio?: string;
+  avatar?: string;
+}
+
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, data: UpdateUserData): Promise<User>;
   searchUsers(query: string): Promise<User[]>;
   
   // Posts
@@ -165,6 +173,23 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: number, data: UpdateUserData): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+
+    const updatedUser: User = {
+      ...user,
+      displayName: data.displayName !== undefined ? data.displayName : user.displayName,
+      bio: data.bio !== undefined ? data.bio : user.bio,
+      avatar: data.avatar !== undefined ? data.avatar : user.avatar
+    };
+
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   async searchUsers(query: string): Promise<User[]> {

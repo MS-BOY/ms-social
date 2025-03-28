@@ -12,11 +12,18 @@ interface User {
   bio?: string;
 }
 
+interface UpdateProfileData {
+  displayName?: string;
+  bio?: string | null;
+  avatar?: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (loginIdentifier: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, displayName: string) => Promise<void>;
+  updateProfile: (userId: number, data: UpdateProfileData) => Promise<void>;
   logout: () => void;
 }
 
@@ -25,6 +32,7 @@ export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
   login: async () => {},
   register: async () => {},
+  updateProfile: async () => {},
   logout: () => {},
 });
 
@@ -132,8 +140,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   };
 
+  const updateProfile = async (userId: number, data: UpdateProfileData) => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest("PATCH", `/api/users/${userId}`, data);
+      const updatedUser = await response.json();
+      
+      // Update user state
+      setUser(updatedUser);
+      
+      // Update user data in localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+      
+      return updatedUser;
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Failed to update profile",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );

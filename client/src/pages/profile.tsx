@@ -109,7 +109,15 @@ export default function Profile() {
                 </div>
                 
                 {/* Actions */}
-                <div className="flex justify-end mb-12 sm:mb-0">
+                <div className="flex justify-end mb-12 sm:mb-0 space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+                    onClick={() => setLocation("/profile/edit")}
+                  >
+                    <UserIcon size={16} className="mr-2" />
+                    Edit Profile
+                  </Button>
                   <Button 
                     variant="outline" 
                     className="bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
