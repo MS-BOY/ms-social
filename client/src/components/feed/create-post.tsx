@@ -7,12 +7,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CreatePollModal } from "@/components/modals/create-poll-modal";
+import { Progress } from "@/components/ui/progress";
 import {
   ImageIcon,
   FileVideoIcon,
   BarChart2Icon,
   MapPinIcon,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 
 export function CreatePost() {
@@ -23,6 +25,8 @@ export function CreatePost() {
   const [selectedMedia, setSelectedMedia] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -101,21 +105,57 @@ export function CreatePost() {
       
       // If media was selected, upload it first
       if (selectedMedia) {
+        setIsUploading(true);
+        setUploadProgress(0);
+        
         const formData = new FormData();
         formData.append('media', selectedMedia);
         
-        const response = await fetch('/api/media/upload', {
-          method: 'POST',
-          body: formData,
+        // Use XMLHttpRequest for progress tracking
+        const xhr = new XMLHttpRequest();
+        
+        // Setup the progress event
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to upload media');
-        }
+        // Create a promise to handle the XHR request
+        const uploadPromise = new Promise<{ url: string }>((resolve, reject) => {
+          xhr.open('POST', '/api/media/upload', true);
+          
+          xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const data = JSON.parse(xhr.responseText);
+                resolve(data);
+              } catch (e) {
+                reject(new Error('Invalid response from server'));
+              }
+            } else {
+              reject(new Error('Failed to upload media'));
+            }
+          };
+          
+          xhr.onerror = function() {
+            reject(new Error('Network error occurred'));
+          };
+          
+          xhr.send(formData);
+        });
         
-        const data = await response.json();
-        mediaUrl = data.url;
-        mediaTypeValue = mediaType || '';
+        try {
+          const data = await uploadPromise;
+          mediaUrl = data.url;
+          mediaTypeValue = mediaType || '';
+        } catch (error) {
+          throw error;
+        } finally {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
       }
       
       // Create the post with or without media
@@ -184,10 +224,24 @@ export function CreatePost() {
                       className="w-full h-auto object-cover max-h-80" 
                     />
                   )}
+                  
+                  {/* Upload progress overlay */}
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+                      <div className="text-white mb-2 font-medium">{uploadProgress}%</div>
+                      <Progress 
+                        value={uploadProgress} 
+                        max={100} 
+                        className="w-3/4 h-2 bg-gray-700" 
+                      />
+                      <div className="text-white text-sm mt-2">Uploading...</div>
+                    </div>
+                  )}
                 </div>
                 <button 
                   className="absolute top-2 right-2 bg-zinc-800 bg-opacity-75 rounded-full p-1 text-white hover:bg-opacity-100"
                   onClick={clearMedia}
+                  disabled={isUploading}
                 >
                   <X size={16} />
                 </button>
@@ -248,9 +302,16 @@ export function CreatePost() {
               <Button 
                 className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-1.5 rounded-full text-sm font-medium transition"
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
               >
-                Post
+                {isSubmitting || isUploading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {isUploading ? 'Uploading...' : 'Posting...'}
+                  </div>
+                ) : (
+                  'Post'
+                )}
               </Button>
             </div>
           </div>
