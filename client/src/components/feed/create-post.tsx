@@ -7,7 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CreatePollModal } from "@/components/modals/create-poll-modal";
-import { Progress } from "@/components/ui/progress";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   ImageIcon,
   FileVideoIcon,
@@ -228,13 +228,15 @@ export function CreatePost() {
                   {/* Upload progress overlay */}
                   {isUploading && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
-                      <div className="text-white mb-2 font-medium">{uploadProgress}%</div>
-                      <Progress 
-                        value={uploadProgress} 
-                        max={100} 
-                        className="w-3/4 h-2 bg-gray-700" 
+                      <CircularProgress 
+                        value={uploadProgress}
+                        size={70}
+                        strokeWidth={5}
+                        progressColor="rgb(70, 130, 246)"
+                        bgColor="rgba(255, 255, 255, 0.2)"
+                        textClassName="text-white font-semibold"
                       />
-                      <div className="text-white text-sm mt-2">Uploading...</div>
+                      <div className="text-white text-sm mt-3">Uploading...</div>
                     </div>
                   )}
                 </div>

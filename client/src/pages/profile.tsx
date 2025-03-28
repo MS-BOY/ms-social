@@ -229,7 +229,7 @@ export default function Profile() {
                     )}
                     <div className="flex items-center">
                       <CalendarIcon size={14} className="mr-1" />
-                      <span>{formatJoinDate(user.createdAt)}</span>
+                      <span>{formatJoinDate(user.createdAt || new Date().toISOString())}</span>
                     </div>
                   </div>
                   
@@ -256,7 +256,7 @@ export default function Profile() {
               </TabsList>
               
               <TabsContent value="posts" className="mt-4">
-                {userPosts && userPosts.length > 0 ? (
+                {userPosts && Array.isArray(userPosts) && userPosts.length > 0 ? (
                   userPosts.map((post: any) => (
                     <PostCard key={post.id} post={post} />
                   ))
@@ -269,7 +269,7 @@ export default function Profile() {
               </TabsContent>
               
               <TabsContent value="followers" className="mt-4">
-                {followers && followers.length > 0 ? (
+                {followers && Array.isArray(followers) && followers.length > 0 ? (
                   <div className="bg-zinc-900 rounded-xl p-4">
                     <div className="grid gap-4">
                       {followers.map((follower: any) => (
@@ -333,7 +333,7 @@ export default function Profile() {
               </TabsContent>
               
               <TabsContent value="following" className="mt-4">
-                {following && following.length > 0 ? (
+                {following && Array.isArray(following) && following.length > 0 ? (
                   <div className="bg-zinc-900 rounded-xl p-4">
                     <div className="grid gap-4">
                       {following.map((followedUser: any) => (

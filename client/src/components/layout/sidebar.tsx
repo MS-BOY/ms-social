@@ -34,6 +34,7 @@ export function Sidebar() {
   const links = [
     { href: "/", icon: <HomeIcon size={20} />, text: "Home" },
     { href: "/explore", icon: <SearchIcon size={20} />, text: "Explore" },
+    { href: "/search", icon: <SearchIcon size={20} />, text: "Search Users" },
     { href: "/notifications", icon: <BellIcon size={20} />, text: "Notifications", count: 3 },
     { href: "/messages", icon: <MessageSquareIcon size={20} />, text: "Messages", count: 2 },
     { href: "/profile", icon: <UserIcon size={20} />, text: "Profile" },

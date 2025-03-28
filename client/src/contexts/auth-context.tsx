@@ -10,6 +10,7 @@ interface User {
   displayName: string;
   avatar?: string;
   bio?: string;
+  createdAt?: string;
 }
 
 interface UpdateProfileData {

@@ -13,6 +13,7 @@ import Messages from "@/pages/messages";
 import Profile from "@/pages/profile";
 import EchoLink from "@/pages/echo-link";
 import EditProfile from "@/pages/edit-profile";
+import Search from "@/pages/search";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/profile/edit" component={EditProfile} />
       <Route path="/echo-link" component={EchoLink} />
+      <Route path="/search" component={Search} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route component={NotFound} />
