@@ -27,22 +27,44 @@ export function PostCard({ post }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
   
-  const { data: postUser } = useQuery({
+  const { data: postUser } = useQuery<{
+    id: number;
+    username: string;
+    displayName: string;
+    avatar: string;
+    bio?: string;
+  }>({
     queryKey: [`/api/users/${post.userId}`],
     enabled: !!post.userId,
   });
   
-  const { data: likes } = useQuery({
+  const { data: likes = [] } = useQuery<Array<{
+    id: number;
+    userId: number;
+    postId: number;
+    createdAt: string;
+  }>>({
     queryKey: [`/api/posts/${post.id}/likes`],
     enabled: !!post.id,
   });
   
-  const { data: comments } = useQuery({
+  const { data: comments = [] } = useQuery<Array<{
+    id: number;
+    userId: number;
+    postId: number;
+    content: string;
+    createdAt: string;
+  }>>({
     queryKey: [`/api/posts/${post.id}/comments`],
     enabled: !!post.id,
   });
   
-  const { data: polls } = useQuery({
+  const { data: polls = [] } = useQuery<Array<{
+    id: number;
+    postId: number;
+    question: string;
+    createdAt: string;
+  }>>({
     queryKey: [`/api/posts/${post.id}/polls`],
     enabled: !!post.id,
   });
@@ -132,7 +154,16 @@ export function PostCard({ post }: PostCardProps) {
 
   const hasPoll = polls && polls.length > 0;
 
-  if (!postUser) return null;
+  // Fallback user data in case the user isn't found
+  const userDisplayData: {
+    displayName: string;
+    username: string;
+    avatar: string;
+  } = postUser || {
+    displayName: 'Unknown User',
+    username: 'user',
+    avatar: `https://ui-avatars.com/api/?name=User&background=random`
+  };
 
   return (
     <div className="bg-zinc-900 rounded-xl mb-4 border border-zinc-800 overflow-hidden shadow-sm">
@@ -140,15 +171,15 @@ export function PostCard({ post }: PostCardProps) {
       <div className="p-4">
         <div className="flex items-start">
           <Avatar className="w-10 h-10 mr-3">
-            <AvatarImage src={postUser.avatar} alt={postUser.displayName} />
-            <AvatarFallback>{getInitials(postUser.displayName)}</AvatarFallback>
+            <AvatarImage src={userDisplayData.avatar} alt={userDisplayData.displayName} />
+            <AvatarFallback>{getInitials(userDisplayData.displayName)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold">{postUser.displayName}</p>
+                <p className="font-semibold">{userDisplayData.displayName}</p>
                 <p className="text-xs text-gray-400 flex items-center">
-                  <span>@{postUser.username}</span>
+                  <span>@{userDisplayData.username}</span>
                   <span className="mx-1">·</span>
                   <span>{formatTimeAgo(post.createdAt)}</span>
                 </p>
@@ -191,7 +222,7 @@ export function PostCard({ post }: PostCardProps) {
           )}
 
           {/* Poll if exists */}
-          {hasPoll && <PollOptions pollId={polls[0].id} />}
+          {hasPoll && polls.length > 0 && <PollOptions pollId={polls[0].id} />}
         </div>
       </div>
       
